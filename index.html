@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Decolonising Ourselves — Bingo Question Draw</title>
+<style>
+  :root{
+    --bg:#faf6f1; --panel:#fffdf9; --ink:#2c2a28; --muted:#6b665f;
+    --green:#2f6f6a; --terra:#c47a5a; --sand:#9c8b6e; --sea:#7fb3ad;
+    --shadow: 0 14px 40px rgba(0,0,0,.08);
+    --radius: 22px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+       color:var(--ink); background: var(--bg);}
+  .wrap{max-width:1120px; margin:22px auto; padding: 0 18px;}
+  .badge{display:inline-block;background:#e6f2f0;color:var(--green);padding:6px 10px;border-radius:999px;
+         font-size:12px;font-weight:800;letter-spacing:.3px;text-transform:uppercase}
+  h1{margin:8px 0 2px;font-size: clamp(24px,3.2vw,38px); line-height:1.1}
+  .subtitle{color:var(--muted); margin:0 0 18px}
+  .grid{display:grid;grid-template-columns:2fr 1fr; gap:18px;}
+  @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+  .card{background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px;}
+  .controls{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px}
+  .btn{appearance:none;border:0;border-radius:16px;padding:12px 18px;font-weight:900;letter-spacing:.2px;
+       display:inline-flex;align-items:center;gap:10px;cursor:pointer;transition:transform .05s ease, filter .2s ease;}
+  .btn:active{ transform: translateY(1px) scale(.995); }
+  .btn.primary{ background: var(--green); color: white; box-shadow: 0 8px 22px rgba(47,111,106,.22); }
+  .btn.ghost{ background: white; color: var(--green); border: 2px solid var(--green); }
+  .btn.warn{ background: var(--terra); color: white; box-shadow: 0 8px 22px rgba(196,122,90,.22); }
+  .btn.timer{ background: #e9edea; color: #46605e; border:2px solid #ccdad8; }
+  .btn[disabled]{ filter: grayscale(.6) opacity(.65); cursor:not-allowed; }
+  .hint{ color: var(--muted); font-size: 13px; margin: 8px 4px 14px; }
+
+  .stage{ display:grid; gap:16px; }
+  .drum{
+    position: relative;
+    margin: 4px auto 0;
+    width: min(360px, 52vw);
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffffff, #edf6f5 60%);
+    border: 10px solid #d4e7e3;
+    display: grid; place-items: center;
+    box-shadow: inset 0 0 0 12px #f3faf9, 0 10px 28px rgba(0,0,0,.06);
+  }
+  .drum:before{
+    content:"";
+    position:absolute; inset: 12px;
+    border-radius:50%;
+    border: 3px dashed #cfe2de;
+  }
+  .numBig{ font-size: min(120px, 18vw); font-weight: 900; color: var(--green); line-height:1; text-shadow: 0 3px 0 rgba(0,0,0,.06); }
+  .spinning{ animation: spinGlow .9s ease-in-out infinite alternate; }
+  @keyframes spinGlow {
+    0% { filter: brightness(1) saturate(1); transform: scale(1); }
+    100% { filter: brightness(1.15) saturate(1.1); transform: scale(1.02); }
+  }
+  .qBox{ border:2px dashed #e7ded4; border-radius: 16px; background: white; padding: clamp(16px,2.2vw,22px);
+         min-height: 120px; display:flex; align-items:center; justify-content:center; text-align:center; }
+  .qTitle{ font-weight: 900; color: var(--terra); margin-bottom: 6px; letter-spacing:.3px; text-transform: uppercase; font-size: 14px;}
+  .qText{ font-size: clamp(18px,2.2vw,26px); font-weight: 800; line-height:1.25; }
+  .timer{ height: 12px; background: #ebe3da; border-radius: 999px; overflow:hidden; }
+  .timer > span{ display:block; height:100%; width:0%; background: linear-gradient(90deg, var(--green), var(--terra)); }
+  .side h3{ margin: 6px 0 10px; font-size: 14px; letter-spacing:.35px; color: var(--muted); text-transform: uppercase;}
+  .numbers{ display:grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .chip{ background: #dcedea; color: #2b5e59; font-weight: 900; border-radius: 14px; padding: 10px 0; text-align:center; }
+  .chip.used{ background: #efe7df; color: #a59a8e; text-decoration: line-through; }
+  footer{ margin-top: 12px; color: var(--muted); font-size: 12px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  kbd{ background:#f1ece6; border:1px solid #e3dbd3; border-bottom-width:2px; border-radius:6px; padding:2px 6px; font-weight:800; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Reflection Activity</span>
+  <h1>Decolonising Ourselves — Bingo Draw</h1>
+  <p class="subtitle">Draw a number → Reveal → <b>Start timer manually</b> • No repeats.</p>
+  <div class="grid">
+    <section class="card stage">
+      <div class="controls">
+        <button id="drawBtn" class="btn primary">🎲 Draw Number</button>
+        <button id="revealBtn" class="btn ghost" disabled>👁️ Reveal Question</button>
+        <button id="startBtn" class="btn timer" disabled>▶️ Start Timer</button>
+        <button id="resetBtn" class="btn warn">♻️ Reset</button>
+      </div>
+      <div class="hint">Shortcuts: <kbd>Space</kbd> draw • <kbd>Enter</kbd> reveal • <kbd>T</kbd> start timer • <kbd>R</kbd> reset</div>
+      <div id="drum" class="drum"><div id="numBig" class="numBig">—</div></div>
+      <div class="qBox" aria-live="polite">
+        <div><div id="qTitle" class="qTitle">Question</div>
+        <div id="qText" class="qText">Draw a number first to reveal its matching reflection prompt.</div></div>
+      </div>
+      <div class="timer"><span id="tbar"></span></div>
+    </section>
+    <aside class="card"><h3>Numbers (1–20)</h3><div id="nums" class="numbers"></div></aside>
+  </div>
+  <footer>
+    <div>Facilitation tip: Only those with the drawn number share for ~30s. No right or wrong — just your honest thoughts.</div>
+    <div><kbd>Space</kbd> draw • <kbd>Enter</kbd> reveal • <kbd>T</kbd> timer • <kbd>R</kbd> reset</div>
+  </footer>
+</div>
+<script>
+const Q=[
+"What is one new thing you learned about colonisation or cultural safety today?",
+"How did this topic change the way you think about your own culture or background?",
+"Why do you think it’s important for us to talk about decolonisation in healthcare?",
+"What surprised you the most from today’s presentation?",
+"Can you think of a moment when you realised that one way of doing things isn’t always right for everyone?",
+"What does respect mean to you when working with people from a different culture?",
+"How can we make sure we are open-minded when learning from Indigenous people?",
+"What does a culturally safe conversation look or sound like to you?",
+"How can an OT show that they value a client’s culture and knowledge?",
+"Why is it important to ask clients what goals they want instead of deciding for them?",
+"How could you work with Elders or Aboriginal Health Workers in your future practice?",
+"What might make a client feel unsafe or uncomfortable in a service, and how could we change that?",
+"What does sharing power between professionals and clients mean in your own words?",
+"How can we use listening and yarning to build better trust?",
+"Why is having Aboriginal-led services important for communities?",
+"How does connecting to Country or culture help people feel healthy and strong?",
+"What can organisations do to make sure Indigenous voices are included in decision-making?",
+"How can non-Indigenous and Indigenous people learn from each other?",
+"What does real equality look like in healthcare or education?",
+"What is one small action you can take to help decolonise yourself – at uni, in practice, or in daily life?"
+];
+</script>
+</body>
+</html>
